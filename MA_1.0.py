@@ -14,7 +14,7 @@ def read_csv(symbol):
 
 def calculate_MA(data):
 	data['MA'] = data.rolling(window=48*60).mean()
-	data['STD'] = data['A6'].rolling(window=48*60).std()
+	data['STD'] = data['A6'].rolling(window=48*60).std() * np.sqrt(48*60)
 	data['Upper_Band'] = data['MA']+2*data['STD']
 	data['Lower_Band'] = data['MA']-2*data['STD']
 	data_ma = data[['A6','MA','Upper_Band','Lower_Band']]	
