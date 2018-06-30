@@ -3,30 +3,40 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-def test_run():
-	data = read_csv('A6')
-	data_MA = calculate_MA(data)
-	plot_result(data_MA)
-
 def read_csv(symbol):
-	data = pd.read_csv('data/data_2017/{}.csv'.format(symbol), index_col=0)
+	data = pd.read_csv('data/data_2017/{}.csv'.format(symbol), index_col=0, parse_dates=True)
 	return data
 
+def get_spread(name):
+	TS = read_csv('TS')
+	ZN = read_csv('ZN')
+	A6 = read_csv('A6')
+	data = TS.join(ZN, how='inner')
+	data = data.join(A6, how='inner')
+	data[name] = data['TS'] - data['ZN'] + .3 * data['A6']
+	data[name].dropna()
+	return data
+	
 def calculate_MA(data):
-	data['MA'] = data.rolling(window=48*60).mean()
-	data['STD'] = data['A6'].rolling(window=48*60).std()
-	data['Upper_Band'] = data['MA']+2*data['STD']
-	data['Lower_Band'] = data['MA']-2*data['STD']
-	data_ma = data[['A6','MA','Upper_Band','Lower_Band']]	
-	return data_ma
+	data['MA'] = data['Spread'].rolling(window=48*60).mean()
+	data['STD'] = data['Spread'].rolling(window=48*60).std()
+	data['Upper_Band'] = data['MA'] + 2 * data['STD']
+	data['Lower_Band'] = data['MA'] - 2 * data['STD']
+	return data
 
-def print_result(data):
-	print data
+def Trading_Signal(data):
+	data['Regime'] = np.where(data['Spread'] > data['Upper_Band'], 1, 0)
+	data['Regime'] = np.where(data['Spread'] < data['Lower_Band'], -1, data['Regime'])
+	return data
 
-def plot_result(data):
-	data.dropna()
-	data.plot.line()
-	plt.show()
-    
+def test_run():
+	data = get_spread('Spread')
+	data = calculate_MA(data)
+	data = Trading_Signal(data)
+	# data[['Spread','MA','Upper_Band','Lower_Band']].plot()
+	print data['Regime'].value_counts()
+	print (data['Regime'] - data['Regime'].shift(1)).value_counts()
+	# plt.show()
+
 if __name__ == '__main__':
 	test_run()
