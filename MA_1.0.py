@@ -7,6 +7,14 @@ def read_csv(symbol):
 	data = pd.read_csv('data/data_2017/{}.csv'.format(symbol), index_col=0, parse_dates=True)
 	return data
 
+def Break_Components(str):
+	comp_dict = {}
+	comp_list = str.replace('-', ' -').replace('+', ' +').split(' ')
+	for item in comp_list:
+		[factor, prod] = item.split('*')
+		comp_dict[prod] = float(factor)
+	return comp_dict
+
 def get_spread(name):
 	TS = read_csv('TS')
 	ZN = read_csv('ZN')
