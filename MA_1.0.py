@@ -11,20 +11,27 @@ def Break_Components(str):
 	comp_dict = {}
 	comp_list = str.replace('-', ' -').replace('+', ' +').split(' ')
 	for item in comp_list:
-		[factor, prod] = item.split('*')
+		if '*' in item:
+			[factor, prod] = item.split('*')
+		elif item[0] == '-':
+			[factor, prod] = [-1, item[1:]]
+		else:
+			[factor, prod] = [1, item]
 		comp_dict[prod] = float(factor)
 	return comp_dict
 
 def get_spread(name):
-	TS = read_csv('TS')
-	ZN = read_csv('ZN')
-	A6 = read_csv('A6')
-	data = TS.join(ZN, how='inner')
-	data = data.join(A6, how='inner')
-	data[name] = data['TS'] - data['ZN'] + .3 * data['A6']
-	data[name].dropna()
-	return data
+	comp_dict = Break_Components(name)
+	data = read_csv(comp_dict.keys()[0]) * comp_dict[comp_dict.keys()[0]]
 	
+	for item in comp_dict.keys():
+		if item != comp_dict.keys()[0]:
+			data_temp = read_csv(item) * comp_dict[item]
+			data = data.join(data_temp, how='inner')
+
+	data['Spread'] = data.sum(axis=1)
+	return data
+
 def calculate_MA(data):
 	data['MA'] = data['Spread'].rolling(window=48*60).mean()
 	data['STD'] = data['Spread'].rolling(window=48*60).std()
@@ -38,13 +45,14 @@ def Trading_Signal(data):
 	return data
 
 def test_run():
-	data = get_spread('Spread')
+	data = get_spread('TS-ZN+.3*A6')
+	print data
 	data = calculate_MA(data)
 	data = Trading_Signal(data)
-	# data[['Spread','MA','Upper_Band','Lower_Band']].plot()
+	data[['Spread','MA','Upper_Band','Lower_Band']].plot()
 	print data['Regime'].value_counts()
 	print (data['Regime'] - data['Regime'].shift(1)).value_counts()
-	# plt.show()
+	plt.show()
 
 if __name__ == '__main__':
 	test_run()
