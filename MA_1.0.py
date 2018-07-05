@@ -7,7 +7,7 @@ def read_csv(symbol):
 	data = pd.read_csv('data/data_2017/{}.csv'.format(symbol), index_col=0, parse_dates=True)
 	return data
 
-def Break_Components(str):
+def read_spread_name(str):
 	comp_dict = {}
 	comp_list = str.replace('-', ' -').replace('+', ' +').split(' ')
 	for item in comp_list:
@@ -21,7 +21,7 @@ def Break_Components(str):
 	return comp_dict
 
 def get_spread(name):
-	comp_dict = Break_Components(name)
+	comp_dict = read_spread_name(name)
 	data = read_csv(comp_dict.keys()[0]) * comp_dict[comp_dict.keys()[0]]
 	
 	for item in comp_dict.keys():
@@ -45,7 +45,7 @@ def Trading_Signal(data):
 	return data
 
 def test_run():
-	data = get_spread('TS-ZN+.3*A6')
+	data = get_spread('R-ZN+.3*B6')
 	print data
 	data = calculate_MA(data)
 	data = Trading_Signal(data)
