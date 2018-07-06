@@ -41,6 +41,7 @@ def calculate_MA(data):
 
 def Trading_Signal(data):
 	data['Position'] = np.trunc((data['MA'] - data['Spread']) / data['STD'])
+	data['Position'] = np.where(data['Position'].isnull(), 0, data['Position'])
 	data['Trade'] = data['Position'] - data['Position'].shift(1)
 	data['Price'] = data['Trade'] * data['Spread']
 	data['CumPrice'] = data['Price'].cumsum()
@@ -51,13 +52,12 @@ def Trading_Signal(data):
 	return data
 
 def test_run():
-	data = get_spread('R-ZN+.3*B6')
+	data = get_spread('GBL-R')
 	data = calculate_MA(data)
 	data = Trading_Signal(data)
 	# data[['Spread','MA']].plot()
 	data[['Position', 'Trade', 'Price', 'CumPrice', 'Value', 'PnL']].to_csv('test.csv')
-
-	(data['PnL']).plot()
+	data['PnL'].plot()
 	# print (data['Position'] - data['Position'].shift(1)).value_counts()
 	plt.show()
 
