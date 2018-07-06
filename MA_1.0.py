@@ -35,23 +35,30 @@ def get_spread(name):
 def calculate_MA(data):
 	data['MA'] = data['Spread'].rolling(window=48*60).mean()
 	data['STD'] = data['Spread'].rolling(window=48*60).std()
-	data['Upper_Band'] = data['MA'] + 2 * data['STD']
-	data['Lower_Band'] = data['MA'] - 2 * data['STD']
+	# data['Upper_Band'] = data['MA'] + 2 * data['STD']
+	# data['Lower_Band'] = data['MA'] - 2 * data['STD']
 	return data
 
 def Trading_Signal(data):
-	data['Regime'] = np.where(data['Spread'] > data['Upper_Band'], 1, 0)
-	data['Regime'] = np.where(data['Spread'] < data['Lower_Band'], -1, data['Regime'])
+	data['Position'] = np.trunc((data['MA'] - data['Spread']) / data['STD'])
+	data['Trade'] = data['Position'] - data['Position'].shift(1)
+	data['Price'] = data['Trade'] * data['Spread']
+	data['CumPrice'] = data['Price'].cumsum()
+	data['Value'] = data['Spread'] * data['Position']
+	data['PnL'] = data['Value'] - data['CumPrice']
+	# data['Position'] = np.where(data['Spread'] > data['Upper_Band'], 1, 0)
+	# data['Position'] = np.where(data['Spread'] < data['Lower_Band'], -1, data['Position'])
 	return data
 
 def test_run():
 	data = get_spread('R-ZN+.3*B6')
-	print data
 	data = calculate_MA(data)
 	data = Trading_Signal(data)
-	data[['Spread','MA','Upper_Band','Lower_Band']].plot()
-	print data['Regime'].value_counts()
-	print (data['Regime'] - data['Regime'].shift(1)).value_counts()
+	# data[['Spread','MA']].plot()
+	data[['Position', 'Trade', 'Price', 'CumPrice', 'Value', 'PnL']].to_csv('test.csv')
+
+	(data['PnL']).plot()
+	# print (data['Position'] - data['Position'].shift(1)).value_counts()
 	plt.show()
 
 if __name__ == '__main__':
