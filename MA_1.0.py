@@ -52,11 +52,13 @@ def Trading_Signal(data):
 	return data
 
 def test_run():
-	data = get_spread('GBL-R')
+	data = get_spread('R-ZN+.3*B6')
 	data = calculate_MA(data)
 	data = Trading_Signal(data)
+	
 	# data[['Spread','MA']].plot()
-	data[['Position', 'Trade', 'Price', 'CumPrice', 'Value', 'PnL']].to_csv('test.csv')
+	data[['Spread', 'Position', 'Trade', 'Price', 'CumPrice', 'Value', 'PnL']].to_csv('test_1.csv')
+	data[data['Trade'] != 0].to_csv('test.csv')
 	data['PnL'].plot()
 	# print (data['Position'] - data['Position'].shift(1)).value_counts()
 	plt.show()
