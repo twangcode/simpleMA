@@ -39,27 +39,35 @@ def calculate_MA(data):
 	# data['Lower_Band'] = data['MA'] - 2 * data['STD']
 	return data
 
-def Trading_Signal(data):
-	data['Position'] = np.trunc((data['MA'] - data['Spread']) / data['STD'])
-	data['Position'] = np.where(data['Position'].isnull(), 0, data['Position'])
-	data['Trade'] = data['Position'] - data['Position'].shift(1)
-	data['Price'] = data['Trade'] * data['Spread']
-	data['CumPrice'] = data['Price'].cumsum()
-	data['Value'] = data['Spread'] * data['Position']
-	data['PnL'] = data['Value'] - data['CumPrice']
+def Trading_Signal(data, entry=2.0, exit=0.5):
+	data['Init_Long'] = np.where(data['Spread'] < (data['MA'] - data['STD'] * entry), 1, 0)
+	data['Takeoff_Long'] = np.where(data['Spread'] > (data['MA'] - data['STD'] * entry * exit), 1, 0)
+	result = data[(data['Init_Long'] + data['Takeoff_Long']) != 0].copy()
+	result['Init_Long_1'] = result['Init_Long'] - result['Init_Long'].shift(1)
+	result['Takeoff_Long_1'] = result['Takeoff_Long'] - result['Takeoff_Long'].shift(1)
+	# data['temp'] = data['Init_Long'] + data['Takeoff_Long']
+	# data['Position'] = np.trunc((data['MA'] - data['Spread']) / data['STD'])
+	# data['Position'] = np.where(data['Position'].isnull(), 0, data['Position'])
+	# data['Trade'] = data['Position'] - data['Position'].shift(1)
+	# data['Price'] = data['Trade'] * data['Spread']
+	# data['CumPrice'] = data['Price'].cumsum()
+	# data['Value'] = data['Spread'] * data['Position']
+	# data['PnL'] = data['Value'] - data['CumPrice']
 	# data['Position'] = np.where(data['Spread'] > data['Upper_Band'], 1, 0)
 	# data['Position'] = np.where(data['Spread'] < data['Lower_Band'], -1, data['Position'])
-	return data
+	return result
 
 def test_run():
 	data = get_spread('R-ZN+.3*B6')
 	data = calculate_MA(data)
-	data = Trading_Signal(data)
+	result = Trading_Signal(data)
+	# data[['Spread', 'Upper_Band', 'Lower_Band']].plot()
 	
+	result[(result['Init_Long_1'] == 1) | (result['Takeoff_Long_1'] == 1)].to_csv('test.csv')
 	# data[['Spread','MA']].plot()
-	data[['Spread', 'Position', 'Trade', 'Price', 'CumPrice', 'Value', 'PnL']].to_csv('test_1.csv')
-	data[data['Trade'] != 0].to_csv('test.csv')
-	data['PnL'].plot()
+	# data[['Spread', 'Position', 'Trade', 'Price', 'CumPrice', 'Value', 'PnL']].to_csv('test_1.csv')
+	# data[data['Trade'] != 0].to_csv('test.csv')
+	# data['PnL'].plot()
 	# print (data['Position'] - data['Position'].shift(1)).value_counts()
 	plt.show()
 
