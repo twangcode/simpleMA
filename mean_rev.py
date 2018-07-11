@@ -2,6 +2,9 @@ import tuo_trading as tt
 import datetime
 from dateutil import parser
 
+
+
+
 def group_by_day(spread_name, start_date='2018-07-04', end_date=datetime.date.today()):
 	# Get data:
 	data = tt.get_spread_data(spread_name)
