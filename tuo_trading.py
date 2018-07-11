@@ -30,5 +30,5 @@ def get_spread_data(name):
 			data_temp = read_csv(item) * comp_dict[item]
 			data = data.join(data_temp, how='inner')
 
-	data['Spread'] = data.sum(axis=1)
+	data[name] = data.sum(axis=1)
 	return data

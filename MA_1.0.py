@@ -93,12 +93,12 @@ def Back_Test(data):
 	# Calculate PnL:
 	result = data[['Spread','Position']].copy()
 	result['Trade'] = result['Position'] - result['Position'].shift(1)
-	# result['Position'] = result['Trade'].cumsum()
 	result['Price'] = result['Trade'] * result['Spread']
 	result['CumPrice'] = result['Price'].cumsum()
 	result['Value'] = result['Spread'] * result['Position']
 	result['PnL'] = result['Value'] - result['CumPrice']
 	# Calculate Sharpe_Ratio:
+	
 
 	return result
 
