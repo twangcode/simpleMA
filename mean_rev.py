@@ -25,9 +25,9 @@ def group_by_day(spread_name, start_date='2018-07-04', end_date=datetime.date.to
 
 
 def main():
-	spread_name = 'GBL-ZN+.3*E6'
-	group_by_day(spread_name)
-	
+	# spread_name = 'GBL-ZN+.3*E6'
+	# group_by_day(spread_name)
+	print range(5,100)
 
 
 if __name__ == '__main__':

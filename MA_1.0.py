@@ -41,15 +41,64 @@ def calculate_MA(data, hour=48, bar_size=60, entry=2.0, exit=0.5):
 	data['ShortExit'] = data['UpperBand'] - data['STD'] * entry * exit
 	return data
 
-
-def generate_position(data):
+def generate_position(data, entry=2.0, exit=0.5):
+	data = calculate_MA(data, entry=entry, exit=exit)
 	data['Position'] = None
 	data['Position'] = np.where(data['Spread'] > data['UpperBand'], -1, None)
 	data['Position'] = np.where(data['Spread'] < data['LowerBand'], 1, data['Position'])
 	data['Position'] = np.where((data['Spread'] > data['LongExit']) & (data['Spread'] < data['ShortExit']), 0, data['Position'])
 	data['Position'] = data['Position'].fillna(method='ffill')
+	data['Position'] = data['Position'].fillna(0)
 	return data
 
+def Back_Test(data):
+	# Calculate PnL:
+	result = data[['Spread','Position']].copy()
+	result['Trade'] = result['Position'] - result['Position'].shift(1)
+	result['Price'] = result['Trade'] * result['Spread']
+	result['Value'] = result['Spread'] * result['Position']
+	result['cumPnL'] = result['Value'] - result['Price'].cumsum()
+	
+	# Calculate daily_PnL:
+	daily_PnL = result.groupby(result.index.date).last()[['Position', 'cumPnL']].fillna(method='ffill').fillna(0)
+	daily_PnL['PnL'] = daily_PnL['cumPnL'] - daily_PnL['cumPnL'].shift(1)
+
+	# Calculate incremental Sharpe Ratio
+
+	daily_PnL['days'] = pd.Series(range(len(daily_PnL)), index = daily_PnL.index)
+	daily_PnL['incr_mean'] = daily_PnL['PnL'].expanding(2).mean()
+	daily_PnL['incr_std'] = daily_PnL['PnL'].expanding(2).std()
+	daily_PnL['daily_SR'] = daily_PnL['incr_mean'] / daily_PnL['incr_std'] * np.sqrt(daily_PnL['days'])
+
+	 
+
+	return daily_PnL[['Position', 'cumPnL', 'PnL', 'daily_SR']]
+
+
+def test_run():
+	data = get_spread('R-ZN+.3*B6')
+	entrys = np.linspace(.5, 4.0, 8)
+	exits = np.linspace(.5, 1, 3)
+
+	# data = generate_position(data, 1, .5)
+	# Back_Test(data).plot()
+
+	for entry in entrys:
+		for exit in exits:
+
+			data = generate_position(data, entry, exit)
+			result = Back_Test(data)
+			name = str(entry)+','+str(exit)
+			temp = result.rename(columns={'cumPnL':name})
+			print name
+			temp[name].plot(legend=True)
+			# ax.legend(str(entry)+','+str(exit))
+
+	plt.show()
+	
+
+if __name__ == '__main__':
+	test_run()
 
 
 # def Trading_Signal(data, entry=2.0, exit=0.5):
@@ -78,31 +127,4 @@ def generate_position(data):
 
 
 
-def Back_Test(data):
-	# Calculate PnL:
-	result = data[['Spread','Position']].copy()
-	result['Trade'] = result['Position'] - result['Position'].shift(1)
-	result['Price'] = result['Trade'] * result['Spread']
-	result['CumPrice'] = result['Price'].cumsum()
-	result['Value'] = result['Spread'] * result['Position']
-	result['PnL'] = result['Value'] - result['CumPrice']
-	# Calculate Sharpe_Ratio:
-	
 
-	return result
-
-
-def test_run():
-	data = get_spread('2*GBL-GBM-GBX')
-	data = calculate_MA(data)
-
-	data = generate_position(data)
-	# trade = Trading_Signal(data)
-
-	result = Back_Test(data)
-	result['PnL'].plot()
-	
-	plt.show()
-
-if __name__ == '__main__':
-	test_run()
