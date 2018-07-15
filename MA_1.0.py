@@ -41,12 +41,12 @@ def calculate_MA(data, hour=48, bar_size=60, entry=2.0, exit=0.5):
 	data['ShortExit'] = data['UpperBand'] - data['STD'] * entry * exit
 	return data
 
-def generate_position(data, entry=2.0, exit=0.5):
+def generate_position(data, entry=2.0, exit=0.5, threshold=30):
 	data = calculate_MA(data, entry=entry, exit=exit)
 	data['Position'] = None
-	data['Position'] = np.where(data['Spread'] > data['UpperBand'], -1, None)
-	data['Position'] = np.where(data['Spread'] < data['LowerBand'], 1, data['Position'])
-	data['Position'] = np.where((data['Spread'] > data['LongExit']) & (data['Spread'] < data['ShortExit']), 0, data['Position'])
+	data['Position'] = np.where(data['Spread'] > (data['UpperBand'] + threshold), -1, None)
+	data['Position'] = np.where(data['Spread'] < (data['LowerBand'] - threshold), 1, data['Position'])
+	data['Position'] = np.where((data['Spread'] > (data['LongExit'] + threshold)) & (data['Spread'] < (data['ShortExit'] - threshold)), 0, data['Position'])
 	data['Position'] = data['Position'].fillna(method='ffill')
 	data['Position'] = data['Position'].fillna(0)
 	return data
@@ -76,9 +76,9 @@ def Back_Test(data):
 
 
 def test_run():
-	data = get_spread('R-ZN+.3*B6')
-	entrys = np.linspace(.5, 4.0, 8)
-	exits = np.linspace(.5, 1, 3)
+	data = get_spread('GBL-R+0.5*E6-0.5*B6')
+	entrys = np.linspace(.5, 4, 8)
+	exits = np.linspace(.5, .5, 1)
 
 	# data = generate_position(data, 1, .5)
 	# Back_Test(data).plot()
@@ -91,6 +91,8 @@ def test_run():
 			name = str(entry)+','+str(exit)
 			temp = result.rename(columns={'cumPnL':name})
 			print name
+			print 
+			print result['Position'].value_counts()
 			temp[name].plot(legend=True)
 			# ax.legend(str(entry)+','+str(exit))
 
