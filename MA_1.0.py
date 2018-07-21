@@ -7,6 +7,22 @@ def read_csv(symbol):
 	data = pd.read_csv('data/data_2018/{}.csv'.format(symbol), index_col=0, parse_dates=True)
 	return data
 
+def set_session(symbol):
+	data = read_csv(symbol)
+	US_SESSION = ['ZT', 'ZF', 'ZN', 'TN', 'ZB', 'UB' \
+				'ES', 'NKD', 'YM', 'NQ'\
+				'J6', 'A6', 'B6', 'C6', 'E6', 'M6', 'N6'
+				'PL', 'GC', 'SI', 'HG']
+	UK_SESSION = ['R']
+	EU_SESSION = ['GBS', 'GBM', 'GBL', 'GBX', 'ESX', 'DF']
+	AU_SESSION = ['TS', 'YS', 'YAP']
+	CA_SESSION = ['CGB']
+
+	if symbol in US_SESSION:
+		data = data.between_time('17:02', '15:58')
+
+	return data
+
 def read_spread_name(str):
 	comp_dict = {}
 	comp_list = str.replace('-', ' -').replace('+', ' +').split(' ')
@@ -22,15 +38,29 @@ def read_spread_name(str):
 
 def get_spread(name):
 	comp_dict = read_spread_name(name)
-	data = read_csv(comp_dict.keys()[0]) * comp_dict[comp_dict.keys()[0]]
+	data = set_session(comp_dict.keys()[0]) * comp_dict[comp_dict.keys()[0]]
 	
 	for item in comp_dict.keys():
 		if item != comp_dict.keys()[0]:
-			data_temp = read_csv(item) * comp_dict[item]
+			data_temp = set_session(item) * comp_dict[item]
 			data = data.join(data_temp, how='inner')
 
 	data['Spread'] = data.sum(axis=1)
 	return data
+
+def get_spread_session(name):
+	comp_dict = read_spread_name(name)
+	data = set_session(comp_dict.keys()[0]) * comp_dict[comp_dict.keys()[0]]
+	
+	for item in comp_dict.keys():
+		if item != comp_dict.keys()[0]:
+			data_temp = set_session(item) * comp_dict[item]
+			data = data.join(data_temp, how='inner')
+
+	data['Spread'] = data.sum(axis=1)
+	return data
+
+
 
 def calculate_MA(data, hour=48, bar_size=60, entry=2.0, exit=0.5):
 	data['MA'] = data['Spread'].rolling(window=hour*bar_size).mean()
@@ -41,7 +71,7 @@ def calculate_MA(data, hour=48, bar_size=60, entry=2.0, exit=0.5):
 	data['ShortExit'] = data['UpperBand'] - data['STD'] * entry * exit
 	return data
 
-def generate_position(data, entry=2.0, exit=0.5, threshold=30):
+def generate_position(data, entry=2.0, exit=0.5, threshold=20):
 	data = calculate_MA(data, entry=entry, exit=exit)
 	data['Position'] = None
 	data['Position'] = np.where(data['Spread'] > (data['UpperBand'] + threshold), -1, None)
@@ -76,8 +106,11 @@ def Back_Test(data):
 
 
 def test_run():
-	data = get_spread('GBL-R+0.5*E6-0.5*B6')
-	entrys = np.linspace(.5, 4, 8)
+	data = get_spread('GBL-ZN+.5*E6')
+	data = generate_position(data, 2, .5)
+	result = Back_Test(data)
+	PnL = pd.DataFrame(index=result.index.copy())
+	entrys = np.linspace(0.5, 4, 8)
 	exits = np.linspace(.5, .5, 1)
 
 	# data = generate_position(data, 1, .5)
@@ -93,8 +126,11 @@ def test_run():
 			print name
 			print 
 			print result['Position'].value_counts()
-			temp[name].plot(legend=True)
+			PnL[name] = temp[name]
+			# temp[name].plot(legend=True)
 			# ax.legend(str(entry)+','+str(exit))
+	PnL['SUM'] = PnL.sum(axis=1)
+	PnL.plot()
 
 	plt.show()
 	
