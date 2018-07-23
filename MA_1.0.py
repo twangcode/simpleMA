@@ -3,24 +3,33 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-def read_csv(symbol):
+# Set up session time:
+US_SESSION = ['ZT', 'ZF', 'ZN', 'TN', 'ZB', 'UB' \
+				'ES', 'NKD', 'YM', 'NQ'\
+				'J6', 'A6', 'B6', 'C6', 'E6', 'M6', 'N6', \
+				'PL', 'GC', 'SI', 'HG']
+UK_SESSION = ['R']
+EU_SESSION = ['GBS', 'GBM', 'GBL', 'GBX', 'ESX', 'DF']
+AU_SESSION = ['TS', 'YS', 'YAP']
+CA_SESSION = ['CGB']
+
+
+# read data from "/data". 
+#	clean_data: boolean. Whether or not to exclude market opening and closing data points
+# 				
+def read_csv(symbol, clean_data=True):
 	data = pd.read_csv('data/data_2018/{}.csv'.format(symbol), index_col=0, parse_dates=True)
+	if clean_data:
+		data = set_session_time(symbol, data)
 	return data
 
-def set_session(symbol):
-	data = read_csv(symbol)
-	US_SESSION = ['ZT', 'ZF', 'ZN', 'TN', 'ZB', 'UB' \
-				'ES', 'NKD', 'YM', 'NQ'\
-				'J6', 'A6', 'B6', 'C6', 'E6', 'M6', 'N6'
-				'PL', 'GC', 'SI', 'HG']
-	UK_SESSION = ['R']
-	EU_SESSION = ['GBS', 'GBM', 'GBL', 'GBX', 'ESX', 'DF']
-	AU_SESSION = ['TS', 'YS', 'YAP']
-	CA_SESSION = ['CGB']
-
+#	Unfinished set_session function:
+# 	Deleting unreliable data at the time of market opening and closing
+#	Unfinished part: 1. Other exchanges besides US
+#					2. Holiday
+def set_session_time(symbol, data):
 	if symbol in US_SESSION:
 		data = data.between_time('17:02', '15:58')
-
 	return data
 
 def read_spread_name(str):
@@ -38,29 +47,15 @@ def read_spread_name(str):
 
 def get_spread(name):
 	comp_dict = read_spread_name(name)
-	data = set_session(comp_dict.keys()[0]) * comp_dict[comp_dict.keys()[0]]
+	data = read_csv(comp_dict.keys()[0]) * comp_dict[comp_dict.keys()[0]]
 	
 	for item in comp_dict.keys():
 		if item != comp_dict.keys()[0]:
-			data_temp = set_session(item) * comp_dict[item]
+			data_temp = read_csv(item) * comp_dict[item]
 			data = data.join(data_temp, how='inner')
 
 	data['Spread'] = data.sum(axis=1)
 	return data
-
-def get_spread_session(name):
-	comp_dict = read_spread_name(name)
-	data = set_session(comp_dict.keys()[0]) * comp_dict[comp_dict.keys()[0]]
-	
-	for item in comp_dict.keys():
-		if item != comp_dict.keys()[0]:
-			data_temp = set_session(item) * comp_dict[item]
-			data = data.join(data_temp, how='inner')
-
-	data['Spread'] = data.sum(axis=1)
-	return data
-
-
 
 def calculate_MA(data, hour=48, bar_size=60, entry=2.0, exit=0.5):
 	data['MA'] = data['Spread'].rolling(window=hour*bar_size).mean()
@@ -82,15 +77,20 @@ def generate_position(data, entry=2.0, exit=0.5, threshold=20):
 	return data
 
 def Back_Test(data):
-	# Calculate PnL:
-	result = data[['Spread','Position']].copy()
-	result['Trade'] = result['Position'] - result['Position'].shift(1)
-	result['Price'] = result['Trade'] * result['Spread']
-	result['Value'] = result['Spread'] * result['Position']
-	result['cumPnL'] = result['Value'] - result['Price'].cumsum()
-	
+	# Calculate Cumulative PnL:
+	data['Trade'] = data['Position'] - data['Position'].shift(1)
+	data['Trade'] = np.where(data['Trade'].isnull(), data['Position'], data['Trade'])
+	data['Price'] = data['Trade'] * data['Spread']
+	data['MarketValue'] = data['Spread'] * data['Position']
+	data['cumPnL'] = data['MarketValue'] - data['Price'].cumsum()
+	data['plot_trade'] = data['Trade'] * data['Price']
+	data['plot_trade'] = np.where(data['plot_trade'], data['plot_trade'], np.nan)
+
+	data[['Spread', 'UpperBand', 'LowerBand', 'LongExit', 'ShortExit']].plot()
+	data['plot_trade'].plot(style='g^')
+
 	# Calculate daily_PnL:
-	daily_PnL = result.groupby(result.index.date).last()[['Position', 'cumPnL']].fillna(method='ffill').fillna(0)
+	daily_PnL = data.groupby(data.index.date).last()[['Position', 'cumPnL']].fillna(method='ffill').fillna(0)
 	daily_PnL['PnL'] = daily_PnL['cumPnL'] - daily_PnL['cumPnL'].shift(1)
 
 	# Calculate incremental Sharpe Ratio
@@ -98,15 +98,16 @@ def Back_Test(data):
 	daily_PnL['days'] = pd.Series(range(len(daily_PnL)), index = daily_PnL.index)
 	daily_PnL['incr_mean'] = daily_PnL['PnL'].expanding(2).mean()
 	daily_PnL['incr_std'] = daily_PnL['PnL'].expanding(2).std()
-	daily_PnL['daily_SR'] = daily_PnL['incr_mean'] / daily_PnL['incr_std'] * np.sqrt(daily_PnL['days'])
-
-	 
+	daily_PnL['daily_SR'] = daily_PnL['incr_mean'] / daily_PnL['incr_std'] * np.sqrt(daily_PnL['days']) 
 
 	return daily_PnL[['Position', 'cumPnL', 'PnL', 'daily_SR']]
 
 
 def test_run():
-	data = get_spread('GBL-ZN+.5*E6')
+	spread_name = 'GBL-ZN+.5*E6'
+	threshold = 35
+
+	data = get_spread(spread_name)
 	data = generate_position(data, 2, .5)
 	result = Back_Test(data)
 	PnL = pd.DataFrame(index=result.index.copy())
@@ -129,39 +130,13 @@ def test_run():
 			PnL[name] = temp[name]
 			# temp[name].plot(legend=True)
 			# ax.legend(str(entry)+','+str(exit))
-	PnL['SUM'] = PnL.sum(axis=1)
+	# PnL['SUM'] = PnL.sum(axis=1)
 	PnL.plot()
 
 	plt.show()
-	
 
 if __name__ == '__main__':
 	test_run()
-
-
-# def Trading_Signal(data, entry=2.0, exit=0.5):
-# 	if {'Spread', 'MA', 'STD'}.issubset(data.columns):
-# 		Trade = data[['Spread', 'MA', 'STD']].copy()
-# 		Trade['Trigger_Long'] = np.where(Trade['Spread'] < (Trade['MA'] - Trade['STD'] * entry), 1, 0)
-# 		Trade['Trigger_Takeoff_Long'] = np.where(Trade['Spread'] > (Trade['MA'] - Trade['STD'] * entry * exit), 1, 0)
-# 		Trade['Trigger_Short'] = np.where(Trade['Spread'] > (Trade['MA'] + Trade['STD'] * entry), 1, 0)
-# 		Trade['Trigger_Takeoff_Short'] = np.where(Trade['Spread'] < (Trade['MA'] + Trade['STD'] * entry * exit), 1, 0)
-
-# 		Trade['Position'] = 0
-# 		flag = 0
-# 		for i in Trade.index:
-# 			if Trade.at[i, 'Trigger_Long'] == 1:
-# 				flag = 1
-# 				Trade.at[i, 'Position'] = 1
-# 			elif Trade.at[i, 'Trigger_Short'] == 1:
-# 				flag = -1
-# 				Trade.at[i, 'Position'] = -1
-# 			elif (Trade.at[i, 'Trigger_Takeoff_Long'] + Trade.at[i, 'Trigger_Takeoff_Short']) == 1:
-# 				Trade.at[i, 'Position'] = flag
-# 			elif (Trade.at[i, 'Trigger_Takeoff_Long'] + Trade.at[i, 'Trigger_Takeoff_Short']) == 2:
-# 				Trade.at[i, 'Position'] = 0
-# 				flag = 0
-# 		return Trade
 
 
 
