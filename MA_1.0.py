@@ -27,10 +27,18 @@ def read_csv(symbol, clean_data=True):
 # 	Deleting unreliable data at the time of market opening and closing
 #	Unfinished part: 1. Other exchanges besides US
 #					2. Holiday
-def set_session_time(symbol, data):
+def set_session_time(symbol, symbol_data):
 	if symbol in US_SESSION:
-		data = data.between_time('17:02', '15:58')
-	return data
+		symbol_data = symbol_data.between_time('17:02', '15:58')
+	elif symbol in UK_SESSION:
+		symbol_data = symbol_data.between_time('2:02', '11:58')
+	elif symbol in EU_SESSION:
+		symbol_data = symbol_data.between_time('1:02', '14:58')
+	elif symbol in AU_SESSION:
+		symbol_data = symbol_data.between_time('17:32', '15:28')
+	elif symbol in CA_SESSION:
+		symbol_data = symbol_data.between_time('05:02', '15:28')
+	return symbol_data
 
 def read_spread_name(str):
 	comp_dict = {}
@@ -76,19 +84,31 @@ def generate_position(data, entry=2.0, exit=0.5, threshold=20):
 	data['Position'] = data['Position'].fillna(0)
 	return data
 
-def Back_Test(data):
+def calculate_PnL(data, plot_trade=False, plot_cumPnL=False):
 	# Calculate Cumulative PnL:
 	data['Trade'] = data['Position'] - data['Position'].shift(1)
 	data['Trade'] = np.where(data['Trade'].isnull(), data['Position'], data['Trade'])
 	data['Price'] = data['Trade'] * data['Spread']
 	data['MarketValue'] = data['Spread'] * data['Position']
 	data['cumPnL'] = data['MarketValue'] - data['Price'].cumsum()
-	data['plot_trade'] = data['Trade'] * data['Price']
-	data['plot_trade'] = np.where(data['plot_trade'], data['plot_trade'], np.nan)
+	
+	if plot_trade:
+		data['buy'] = np.where(data['Trade'] > 0,  data['Price'] / data['Trade'], np.nan)
+		data['sell'] = np.where(data['Trade'] < 0,  data['Price'] / data['Trade'], np.nan)
+		data[['Spread', 'MA', 'UpperBand', 'LowerBand', 'LongExit', 'ShortExit']].plot()
+		data['buy'].plot(style='g^')
+		data['sell'].plot(style='rv')
+		data.to_csv('test.csv')
 
-	data[['Spread', 'UpperBand', 'LowerBand', 'LongExit', 'ShortExit']].plot()
-	data['plot_trade'].plot(style='g^')
+	if plot_cumPnL:
+		plt.figure()
+		data['cumPnL'].plot()
+	
+	plt.show()
 
+	return data
+
+def calculate_daily_PnL(data):
 	# Calculate daily_PnL:
 	daily_PnL = data.groupby(data.index.date).last()[['Position', 'cumPnL']].fillna(method='ffill').fillna(0)
 	daily_PnL['PnL'] = daily_PnL['cumPnL'] - daily_PnL['cumPnL'].shift(1)
@@ -102,42 +122,40 @@ def Back_Test(data):
 
 	return daily_PnL[['Position', 'cumPnL', 'PnL', 'daily_SR']]
 
+def find_opt_entry_exit(data, threshold):
+	PnL = pd.DataFrame(index=data.index.copy())
+	
+	entrys = np.linspace(0.5, 4, 8)
+	exits = np.linspace(.25, 1, 4)
 
-def test_run():
+	for entry in entrys:
+		for exit in exits:
+			temp_data = generate_position(data, entry=entry, exit=exit, threshold=threshold)
+			temp_data = calculate_PnL(temp_data)
+			name = str(entry)+','+str(exit)
+			PnL[name] = temp_data['cumPnL']
+
+	PnL.plot()
+	plt.show()
+
+
+def main():
+	spread_name = 'GBL-ZN+.5*E6'
+	entry = 2
+	exit = .5
+	threshold = 35
+
+	data = get_spread(spread_name)
+	data = generate_position(data, entry, exit, threshold)
+	calculate_PnL(data, plot_trade=True, plot_cumPnL=True)
+
+def main_2():
 	spread_name = 'GBL-ZN+.5*E6'
 	threshold = 35
 
 	data = get_spread(spread_name)
-	data = generate_position(data, 2, .5)
-	result = Back_Test(data)
-	PnL = pd.DataFrame(index=result.index.copy())
-	entrys = np.linspace(0.5, 4, 8)
-	exits = np.linspace(.5, .5, 1)
-
-	# data = generate_position(data, 1, .5)
-	# Back_Test(data).plot()
-
-	for entry in entrys:
-		for exit in exits:
-
-			data = generate_position(data, entry, exit)
-			result = Back_Test(data)
-			name = str(entry)+','+str(exit)
-			temp = result.rename(columns={'cumPnL':name})
-			print name
-			print 
-			print result['Position'].value_counts()
-			PnL[name] = temp[name]
-			# temp[name].plot(legend=True)
-			# ax.legend(str(entry)+','+str(exit))
-	# PnL['SUM'] = PnL.sum(axis=1)
-	PnL.plot()
-
-	plt.show()
+	find_opt_entry_exit(data, threshold)
+	
 
 if __name__ == '__main__':
-	test_run()
-
-
-
-
+	main_2()
