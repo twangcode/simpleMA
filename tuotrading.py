@@ -65,7 +65,8 @@ def get_spread(name):
 	data['Spread'] = data.sum(axis=1)
 	return data
 
-def calculate_MA(data, hour=48, bar_size=60, entry=2.0, exit=0.5):
+def calculate_MA(spread, hour=48, bar_size=60, entry=2.0, exit=0.5):
+	data = spread.get_spread_data()
 	data['MA'] = data['Spread'].rolling(window=hour*bar_size).mean()
 	data['STD'] = data['Spread'].rolling(window=hour*bar_size).std()
 	data['UpperBand'] = data['MA'] + data['STD'] * entry
@@ -74,8 +75,8 @@ def calculate_MA(data, hour=48, bar_size=60, entry=2.0, exit=0.5):
 	data['ShortExit'] = data['UpperBand'] - data['STD'] * entry * exit
 	return data
 
-def generate_position(data, entry=2.0, exit=0.5, threshold=20):
-	data = calculate_MA(data, entry=entry, exit=exit)
+def generate_position(spread, entry=2.0, exit=0.5, threshold=20):
+	data = calculate_MA(spread, entry=entry, exit=exit)
 	data['Position'] = None
 	data['Position'] = np.where(data['Spread'] > (data['UpperBand'] + threshold), -1, None)
 	data['Position'] = np.where(data['Spread'] < (data['LowerBand'] - threshold), 1, data['Position'])
@@ -84,26 +85,14 @@ def generate_position(data, entry=2.0, exit=0.5, threshold=20):
 	data['Position'] = data['Position'].fillna(0)
 	return data
 
-def calculate_PnL(data, plot_trade=False, plot_cumPnL=False):
+def calculate_PnL(spread, entry=2.0, exit=0.5, threshold=20):
+	data = generate_position(spread, entry, exit, threshold)
 	# Calculate Cumulative PnL:
 	data['Trade'] = data['Position'] - data['Position'].shift(1)
 	data['Trade'] = np.where(data['Trade'].isnull(), data['Position'], data['Trade'])
 	data['Price'] = data['Trade'] * data['Spread']
 	data['MarketValue'] = data['Spread'] * data['Position']
 	data['cumPnL'] = data['MarketValue'] - data['Price'].cumsum()
-	
-	if plot_trade:
-		data['buy'] = np.where(data['Trade'] > 0,  data['Price'] / data['Trade'], np.nan)
-		data['sell'] = np.where(data['Trade'] < 0,  data['Price'] / data['Trade'], np.nan)
-		data[['Spread', 'MA', 'UpperBand', 'LowerBand', 'LongExit', 'ShortExit']].plot()
-		data['buy'].plot(style='g^')
-		data['sell'].plot(style='rv')
-		data.to_csv('test.csv')
-
-	if plot_cumPnL:
-		plt.figure()
-		data['cumPnL'].plot()
-	
-	plt.show()
-
+	data['buy'] = np.where(data['Trade'] > 0,  data['Price'] / data['Trade'], np.nan)
+	data['sell'] = np.where(data['Trade'] < 0,  data['Price'] / data['Trade'], np.nan)
 	return data
