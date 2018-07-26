@@ -1,4 +1,4 @@
-from datetime import datetime
+import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -13,12 +13,15 @@ EU_SESSION = ['GBS', 'GBM', 'GBL', 'GBX', 'ESX', 'DF']
 AU_SESSION = ['TS', 'YS', 'YAP']
 CA_SESSION = ['CGB']
 
+def symbol_to_path(symbol, base_dir='data'):
+	return os.path.join(base_dir, '{}.csv'.format(str(symbol)))
+
 
 # read data from "/data". 
 #	clean_data: boolean. Whether or not to exclude market opening and closing data points
 # 				
-def read_csv(symbol, clean_data=True):
-	data = pd.read_csv('data/data_2018/{}.csv'.format(symbol), index_col=0, parse_dates=True)
+def read_csv(symbol, base_dir='data', clean_data=True):
+	data = pd.read_csv(symbol_to_path(symbol, base_dir), index_col=0, parse_dates=True)
 	if clean_data:
 		data = set_session_time(symbol, data)
 	return data
@@ -48,18 +51,20 @@ def read_spread_name(str):
 			[factor, prod] = item.split('*')
 		elif item[0] == '-':
 			[factor, prod] = [-1, item[1:]]
+		elif item[0] == '+':
+			[factor, prod] = [1, item[1:]]
 		else:
 			[factor, prod] = [1, item]
 		comp_dict[prod] = float(factor)
 	return comp_dict
 
-def get_spread(name):
+def get_spread(name, base_dir='data'):
 	comp_dict = read_spread_name(name)
-	data = read_csv(comp_dict.keys()[0]) * comp_dict[comp_dict.keys()[0]]
+	data = read_csv(comp_dict.keys()[0], base_dir) * comp_dict[comp_dict.keys()[0]]
 	
 	for item in comp_dict.keys():
 		if item != comp_dict.keys()[0]:
-			data_temp = read_csv(item) * comp_dict[item]
+			data_temp = read_csv(item, base_dir) * comp_dict[item]
 			data = data.join(data_temp, how='inner')
 
 	data['Spread'] = data.sum(axis=1)
