@@ -38,18 +38,18 @@ def main():
 	
 	os.system('clear')
 	
-#	read_exchange(CBOT_PRODUCT, start_date, end_date)
+	read_exchange(CBOT_PRODUCT, start_date, end_date)
 	print 'Finished CBOT'
 	print
-#	read_exchange(CME_PRODUCT, start_date, end_date)
+	read_exchange(CME_PRODUCT, start_date, end_date)
 	print 'Finished CME'
 	print
 	
-#	read_exchange(EUREX_PRODUCT, start_date, end_date)
+	read_exchange(EUREX_PRODUCT, start_date, end_date)
 	print 'Finished EUREX'
 	print
 	
-#	read_exchange(ICE_PRODUCT, start_date, end_date)
+	read_exchange(ICE_PRODUCT, start_date, end_date)
 	print 'Finished ICE'
 	print
 	
