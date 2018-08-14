@@ -11,8 +11,8 @@ CME_PRODUCT = ['ES', 'NQ', 'YM', 'NKD', \
 EUREX_PRODUCT = ['AEX', 'DF', 'ESX', 'MX', 'BTP', 'GBL', 'GBM', 'GBX', 'GBS']
 ICE_PRODUCT = ['ICETF', 'ICEDX', 'LET', 'LGO', 'OIL', 'ICECC', 'ICECT', 'ICEKC', 'ICESB']
 LIFFE_PRODUCT = ['X', 'G', 'R']
-SFE_PRODUCT = ['TS', 'YS', 'YAP']
-MO_PRODUCT = ['CGB', 'SXF']
+ASX_PRODUCT = ['TS', 'YS', 'YAP']
+TMX_PRODUCT = ['CGB', 'SXF']
 TYO_PRODUCT = ['BT']
 
 
@@ -33,7 +33,7 @@ def read_exchange(exchange_name, start_date, end_date, to_csv=True):
 			print 'Save to {}.csv'.format(symbol) 
 
 def main():
-	start_date = datetime.date(2018,1,1)
+	start_date = datetime.date(2018,7,1)
 	end_date = datetime.date.today()
 	
 	os.system('clear')
@@ -49,7 +49,11 @@ def main():
 	print 'Finished EUREX'
 	print
 	
+<<<<<<< HEAD
 	#read_exchange(ICE_PRODUCT, start_date, end_date)
+=======
+	# read_exchange(ICE_PRODUCT, start_date, end_date)
+>>>>>>> b2578a2fe310b8f655e4161aca6cf35867841113
 	print 'Finished ICE'
 	print
 	
@@ -57,11 +61,11 @@ def main():
 	print 'Finished LIFFE'
 	print
 	
-	read_exchange(SFE_PRODUCT, start_date, end_date)
-	print 'Finished SFE'
+	read_exchange(ASX_PRODUCT, start_date, end_date)
+	print 'Finished ASX'
 	print
 	
-	read_exchange(MO_PRODUCT, start_date, end_date)
+	read_exchange(TMX_PRODUCT, start_date, end_date)
 	print 'Finished MOTREAL'
 	print
 	
