@@ -58,7 +58,7 @@ def read_spread_name(str):
 		comp_dict[prod] = float(factor)
 	return comp_dict
 
-def get_spread(name, base_dir='data'):
+def get_spread(name, base_dir='data/data_2018'):
 	comp_dict = read_spread_name(name)
 	data = read_csv(comp_dict.keys()[0], base_dir) * comp_dict[comp_dict.keys()[0]]
 	
@@ -71,7 +71,7 @@ def get_spread(name, base_dir='data'):
 	return data
 
 def calculate_MA(spread, hour=48, bar_size=60, entry=2.0, exit=0.5):
-	data = spread.get_spread_data()
+	data = get_spread(spread)
 	data['MA'] = data['Spread'].rolling(window=hour*bar_size).mean()
 	data['STD'] = data['Spread'].rolling(window=hour*bar_size).std()
 	data['UpperBand'] = data['MA'] + data['STD'] * entry

@@ -9,13 +9,14 @@ class Spread():
 		self.name = name
 		self.data = tt.get_spread(self.name, base_dir)['Spread'].to_frame('Spread')
 
-	def calculate_MA(self, hour=48, bar_size=60, entry=2.0, exit=0.5):
-		self.data['MA'] = self.data['Spread'].rolling(window=hour*bar_size).mean()
-		self.data['STD'] = self.data['Spread'].rolling(window=hour*bar_size).std()
-		self.data['UpperBand'] = self.data['MA'] + self.data['STD'] * entry
-		self.data['LowerBand'] = self.data['MA'] - self.data['STD'] * entry
-		self.data['LongExit'] = self.data['LowerBand'] + self.data['STD'] * entry * exit
-		self.data['ShortExit'] = self.data['UpperBand'] - self.data['STD'] * entry * exit
+	# def calculate_MA(self, hour=48, bar_size=60, entry=2.0, exit=0.5):
+	# 	self.data['MA'] = self.data['Spread'].rolling(window=hour*bar_size).mean()
+	# 	self.data['STD'] = self.data['Spread'].rolling(window=hour*bar_size).std()
+	# 	self.data['UpperBand'] = self.data['MA'] + self.data['STD'] * entry
+	# 	self.data['LowerBand'] = self.data['MA'] - self.data['STD'] * entry
+	# 	self.data['LongExit'] = self.data['LowerBand'] + self.data['STD'] * entry * exit
+	# 	self.data['ShortExit'] = self.data['UpperBand'] - self.data['STD'] * entry * exit
+	
 
 	def between(self, start_dt=datetime.now().date().replace(month=1, day=1),\
 				end_dt=datetime.today()):
