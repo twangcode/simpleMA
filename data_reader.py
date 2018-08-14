@@ -49,7 +49,7 @@ def main():
 	print 'Finished EUREX'
 	print
 	
-	read_exchange(ICE_PRODUCT, start_date, end_date)
+	#read_exchange(ICE_PRODUCT, start_date, end_date)
 	print 'Finished ICE'
 	print
 	
