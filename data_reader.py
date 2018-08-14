@@ -33,8 +33,8 @@ def read_exchange(exchange_name, start_date, end_date, to_csv=True):
 			print 'Save to {}.csv'.format(symbol) 
 
 def main():
-	start_date = datetime.date(2018,7,1)
-	end_date = datetime.date.today()
+	start_date = datetime.date(2018,1,1)
+	end_date = datetime.date(2018, 8, 13)
 	
 	os.system('clear')
 	
