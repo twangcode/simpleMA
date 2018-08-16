@@ -16,6 +16,10 @@ def bb3_backtest(spread_name, threshold, base_dir, start_date, end_date):
 	temp = daily_PnL.loc[start_date:end_date]['PnL'].copy()
 	sharpeRatio = temp.mean() / temp.std() * np.sqrt(len(temp))
 
+	# Calculate drawdown
+	daily_PnL['MaxProfit'] = df['cumPnL'].cummax()
+	
+
 	return sharpeRatio
 
 def bb3_backtest_delta_days(spread_name, threshold, base_dir, end_date, delta_days):
@@ -52,9 +56,10 @@ def main():
 	end_date = date.today()
 	base_dir = 'data/data_2018'
 	print bb3_scanner(BB3_list_filename, base_dir, start_date, end_date)
+
 def main_2():
-	spread_name = '2*ZB-TN-UB'
-	threshold = 45
+	spread_name = 'NKD+ZN'
+	threshold = 30
 	start_date = date(2018,7,1)
 	end_date = date.today()
 	delta_days = 60
