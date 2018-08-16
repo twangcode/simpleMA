@@ -52,7 +52,16 @@ def main():
 	end_date = date.today()
 	base_dir = 'data/data_2018'
 	print bb3_scanner(BB3_list_filename, base_dir, start_date, end_date)
+def main_2():
+	spread_name = '2*ZB-TN-UB'
+	threshold = 45
+	start_date = date(2018,7,1)
+	end_date = date.today()
+	delta_days = 60
+	base_dir = 'data/data_2018'
+	print bb3_backtest(spread_name, threshold, base_dir, start_date, end_date)
+	print bb3_backtest_delta_days(spread_name, threshold, base_dir, end_date, delta_days)
 
 if __name__ == '__main__':
-	main()
+	main_2()
 		
