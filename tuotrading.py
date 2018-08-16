@@ -13,14 +13,14 @@ EU_SESSION = ['GBS', 'GBM', 'GBL', 'GBX', 'ESX', 'DF']
 AU_SESSION = ['TS', 'YS', 'YAP']
 CA_SESSION = ['CGB']
 
-def symbol_to_path(symbol, base_dir='data'):
+def symbol_to_path(symbol, base_dir):
 	return os.path.join(base_dir, '{}.csv'.format(str(symbol)))
 
 
 # read data from "/data". 
 #	clean_data: boolean. Whether or not to exclude market opening and closing data points
 # 				
-def read_csv(symbol, base_dir='data', clean_data=True):
+def read_csv(symbol, base_dir, clean_data=True):
 	data = pd.read_csv(symbol_to_path(symbol, base_dir), index_col=0, parse_dates=True)
 	if clean_data:
 		data = set_session_time(symbol, data)
@@ -58,7 +58,7 @@ def read_spread_name(str):
 		comp_dict[prod] = float(factor)
 	return comp_dict
 
-def get_spread(name, base_dir='data/data_2018'):
+def get_spread(name, base_dir):
 	comp_dict = read_spread_name(name)
 	data = read_csv(comp_dict.keys()[0], base_dir) * comp_dict[comp_dict.keys()[0]]
 	
@@ -70,7 +70,7 @@ def get_spread(name, base_dir='data/data_2018'):
 	data['Spread'] = data.sum(axis=1)
 	return data
 
-def calculate_MA(spread_name, base_dir='data/data_2018', hour=48, bar_size=60, entry=2.0, exit=0.5):
+def calculate_MA(spread_name, base_dir, entry, exit, hour=48, bar_size=60):
 	data = get_spread(spread_name, base_dir)
 	data['MA'] = data['Spread'].rolling(window=hour*bar_size).mean()
 	data['STD'] = data['Spread'].rolling(window=hour*bar_size).std()
@@ -80,8 +80,8 @@ def calculate_MA(spread_name, base_dir='data/data_2018', hour=48, bar_size=60, e
 	data['ShortExit'] = data['UpperBand'] - data['STD'] * entry * exit
 	return data
 
-def generate_position(spread_name, base_dir='data/data_2018', entry=2.0, exit=0.5, threshold=20):
-	data = calculate_MA(spread_name, base_dir, entry=entry, exit=exit)
+def generate_position(spread_name, base_dir, entry, exit, threshold):
+	data = calculate_MA(spread_name, base_dir, entry, exit)
 	data['Position'] = None
 	data['Position'] = np.where(data['Spread'] > (data['UpperBand'] + threshold), -1, None)
 	data['Position'] = np.where(data['Spread'] < (data['LowerBand'] - threshold), 1, data['Position'])
@@ -90,7 +90,7 @@ def generate_position(spread_name, base_dir='data/data_2018', entry=2.0, exit=0.
 	data['Position'] = data['Position'].fillna(0)
 	return data
 
-def calculate_PnL(spread_name, base_dir='data/data_2018', entry=2.0, exit=0.5, threshold=20):
+def calculate_PnL(spread_name, base_dir, entry, exit, threshold):
 	data = generate_position(spread_name, base_dir, entry, exit, threshold)
 	# Calculate Cumulative PnL:
 	data['Trade'] = data['Position'] - data['Position'].shift(1)
