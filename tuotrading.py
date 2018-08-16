@@ -70,8 +70,8 @@ def get_spread(name, base_dir='data/data_2018'):
 	data['Spread'] = data.sum(axis=1)
 	return data
 
-def calculate_MA(spread_name, hour=48, bar_size=60, entry=2.0, exit=0.5):
-	data = get_spread(spread_name)
+def calculate_MA(spread_name, base_dir='data/data_2018', hour=48, bar_size=60, entry=2.0, exit=0.5):
+	data = get_spread(spread_name, base_dir)
 	data['MA'] = data['Spread'].rolling(window=hour*bar_size).mean()
 	data['STD'] = data['Spread'].rolling(window=hour*bar_size).std()
 	data['UpperBand'] = data['MA'] + data['STD'] * entry
@@ -80,8 +80,8 @@ def calculate_MA(spread_name, hour=48, bar_size=60, entry=2.0, exit=0.5):
 	data['ShortExit'] = data['UpperBand'] - data['STD'] * entry * exit
 	return data
 
-def generate_position(spread_name, entry=2.0, exit=0.5, threshold=20):
-	data = calculate_MA(spread_name, entry=entry, exit=exit)
+def generate_position(spread_name, base_dir='data/data_2018', entry=2.0, exit=0.5, threshold=20):
+	data = calculate_MA(spread_name, base_dir, entry=entry, exit=exit)
 	data['Position'] = None
 	data['Position'] = np.where(data['Spread'] > (data['UpperBand'] + threshold), -1, None)
 	data['Position'] = np.where(data['Spread'] < (data['LowerBand'] - threshold), 1, data['Position'])
@@ -90,8 +90,8 @@ def generate_position(spread_name, entry=2.0, exit=0.5, threshold=20):
 	data['Position'] = data['Position'].fillna(0)
 	return data
 
-def calculate_PnL(spread_name, entry=2.0, exit=0.5, threshold=20):
-	data = generate_position(spread_name, entry, exit, threshold)
+def calculate_PnL(spread_name, base_dir='data/data_2018', entry=2.0, exit=0.5, threshold=20):
+	data = generate_position(spread_name, base_dir, entry, exit, threshold)
 	# Calculate Cumulative PnL:
 	data['Trade'] = data['Position'] - data['Position'].shift(1)
 	data['Trade'] = np.where(data['Trade'].isnull(), data['Position'], data['Trade'])
