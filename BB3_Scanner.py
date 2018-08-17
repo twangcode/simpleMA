@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 
 def bb3_backtest(spread_name, threshold, base_dir, start_date, end_date, entry, exit):
 	data = tt.calculate_PnL(spread_name, base_dir, entry, exit, threshold)
-	data.to_csv('test.csv')
 
 	# Calculate daily PnL
 	daily_PnL = data.groupby(data.index.date).last()[['Position', 'cumPnL']].fillna(method='ffill').fillna(0)
