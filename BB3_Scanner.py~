@@ -59,8 +59,8 @@ def main():
 	print bb3_scanner(BB3_list_filename, base_dir, start_date, end_date)
 
 def main_2():
-	spread_name = 'CGB+C6'
-	threshold = 15
+	spread_name = 'NKD+ZN'
+	threshold = 35
 	entry = 2.0
 	exit = 0.5
 	start_date = date(2018,7,1)
