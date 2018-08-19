@@ -2,7 +2,7 @@ import tuotrading as tt
 import matplotlib.pyplot as plt
 import numpy as np 
 import pandas as pd
-from datetime import date, timedelta
+from datetime import datetime, date, timedelta
 
 class Dyn_EE():
 	def __init__(self, spread_name, base_dir, entry, exit, threshold):
@@ -18,6 +18,8 @@ class Dyn_EE():
 		return self.data
 	def to_csv(self, filename):
 		self.data.to_csv(filename)
+	
+	# Unifinished plot trade function	
 	def print_trade(self):
 		trades = self.data[self.data['Trade'] != 0][['buy', 'sell']].copy()
 		print trades
@@ -34,10 +36,14 @@ class Dyn_EE():
 		return sharpeRatio
 	def print_SharpeRatio(self, start_date, end_date):
 		print self.get_SharpeRatio(start_date, end_date)
-	def plot_trade(self):
-		self.data[['Spread', 'MA', 'UpperBand', 'LowerBand', 'LongExit', 'ShortExit']].plot()
-		self.data['buy'].plot(style='g^')
-		self.data['sell'].plot(style='rv')
+	def plot_trade(self, start_date, end_date):
+		plot_data = self.data.copy()
+		# print plot_data
+		plot_data = plot_data.loc[start_date:end_date]
+		# temp = daily_PnL.loc[start_date:end_date]['PnL'].copy()
+		plot_data[['Spread', 'MA', 'UpperBand', 'LowerBand', 'LongExit', 'ShortExit']].plot()
+		plot_data['buy'].plot(style='g^')
+		plot_data['sell'].plot(style='rv')
 		plt.show()
 	def plot_cumPnL(self):
 		data['cumPnL'].plot()
@@ -45,7 +51,8 @@ class Dyn_EE():
 
 def test_run():
 	test_obj = Dyn_EE('GBL-ZN', 'data/data_2018', 2.0, 0.5, 30)
-	test_obj.print_SharpeRatio(date(2018,8,1), date(2018,8,10))
+	# test_obj.plot_trade(date(2018,8,1), date(2018,8,10))
+	# test_obj.print_SharpeRatio(date(2018,8,1), date(2018,8,10))
 
 
 if __name__ == '__main__':
