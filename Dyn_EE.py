@@ -50,9 +50,14 @@ class Dyn_EE():
 		plt.show()
 
 def test_run():
-	test_obj = Dyn_EE('GBL-ZN', 'data/data_2018', 2.0, 0.5, 30)
-	# test_obj.plot_trade(date(2018,8,1), date(2018,8,10))
-	# test_obj.print_SharpeRatio(date(2018,8,1), date(2018,8,10))
+	spread_name = 'ZN-ICEDX'
+	threshold = 20
+
+	end_date = date.today()
+	start_date = end_date - timedelta(days=60)
+	test_obj = Dyn_EE(spread_name, 'data/data_2018', 2.0, 0.5, threshold)
+	test_obj.plot_trade(start_date, end_date)
+	test_obj.print_SharpeRatio(start_date, end_date)
 
 
 if __name__ == '__main__':
