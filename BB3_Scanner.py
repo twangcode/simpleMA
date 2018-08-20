@@ -70,5 +70,5 @@ def main_2():
 	print bb3_backtest_delta_days(spread_name, threshold, base_dir, end_date, delta_days, entry, exit)
 
 if __name__ == '__main__':
-	main_2()
+	main()
 		
