@@ -50,8 +50,8 @@ class Dyn_EE():
 		plt.show()
 
 def test_run():
-	spread_name = 'ZN-ICEDX'
-	threshold = 20
+	spread_name = 'A6-E6'
+	threshold = 10
 
 	end_date = date.today()
 	start_date = end_date - timedelta(days=60)
