@@ -52,8 +52,8 @@ def bb3_scanner_delta_days(BB3_list_filename, base_dir, end_date, delta_days, en
 
 def main():
 	BB3_list_filename = 'data/BB3_list.csv'
-	start_date = date(2018,7,1)
 	end_date = date.today()
+	start_date = end_date - timedelta(days=60)
 	base_dir = 'data/data_2018'
 	print bb3_scanner(BB3_list_filename, base_dir, start_date, end_date)
 
