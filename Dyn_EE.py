@@ -49,6 +49,7 @@ class Dyn_EE():
 		data['cumPnL'].plot()
 		plt.show()
 
+<<<<<<< HEAD
 def test_run():
 	spread_name = 'R+X'
 	threshold = 35
@@ -63,3 +64,5 @@ def test_run():
 if __name__ == '__main__':
 	test_run()
 
+=======
+>>>>>>> 9d9e173a5fca2731c8bcbaf5e8987f161aa76e88

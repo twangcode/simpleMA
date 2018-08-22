@@ -28,24 +28,26 @@ def data_reader(symbol, start_date, end_date, start_time=datetime.time(0,0,0), e
 def read_exchange(exchange_name, start_date, end_date, to_csv=True):
 	for symbol in exchange_name:
 		data = data_reader(symbol, start_date, end_date)
+		print data.tail(1)
 		if to_csv:
 			data.to_csv('{}.csv'.format(symbol))
 			print 'Save to {}.csv'.format(symbol) 
 
 def main():
 	start_date = datetime.date(2018,1,1)
-	end_date = datetime.date.today()-datetime.timedelta(days=2)
+	end_date = datetime.date.today() - datetime.timedelta(days=2)
 	
 	os.system('clear')
 	
-	# read_exchange(CBOT_PRODUCT, start_date, end_date)
+	read_exchange(CBOT_PRODUCT, start_date, end_date)
 	print 'Finished CBOT'
 	print
-	# read_exchange(CME_PRODUCT, start_date, end_date)
+
+	read_exchange(CME_PRODUCT, start_date, end_date)
 	print 'Finished CME'
 	print
 	
-	# read_exchange(EUREX_PRODUCT, start_date, end_date)
+	read_exchange(EUREX_PRODUCT, start_date, end_date)
 	print 'Finished EUREX'
 	print
 	
