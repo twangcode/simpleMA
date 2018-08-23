@@ -54,8 +54,10 @@ def main():
 	BB3_list_filename = 'data/BB3_list.csv'
 	end_date = date.today()
 	start_date = end_date - timedelta(days=60)
+	start_date_2 = end_date - timedelta(days=30)
 	base_dir = 'data/data_2018'
 	print bb3_scanner(BB3_list_filename, base_dir, start_date, end_date)
+	
 
 def main_2():
 	spread_name = 'CGB+C6'
