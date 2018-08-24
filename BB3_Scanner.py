@@ -56,7 +56,7 @@ def main():
 	start_date = end_date - timedelta(days=60)
 	start_date_2 = end_date - timedelta(days=30)
 	base_dir = 'data/data_2018'
-	print bb3_scanner(BB3_list_filename, base_dir, start_date, end_date)
+	print bb3_scanner(BB3_list_filename, base_dir, start_date_2, end_date)
 	
 
 def main_2():
