@@ -14,9 +14,11 @@ LIFFE_PRODUCT = ['X', 'G', 'R']
 ASX_PRODUCT = ['TS', 'YS', 'YAP']
 TMX_PRODUCT = ['CGB', 'SXF']
 TYO_PRODUCT = ['BT']
-CME_GE_PRODUCT = ['GE9', 'GE11']
-EUREX_U_PRODUCT = ['U7', 'U11']
-LIFFE_R_PRODUCT = ['L12']
+CME_GE_PRODUCT = ['GE4', 'GE5', 'GE6', 'GE7', 'GE8', 'GE9', 'GE10', 'GE11', 'GE12', 'GE13', 'GE14', \
+		  'GE15', 'GE16', 'GE17', 'GE18', 'GE19', 'GE20', 'GE21', 'GE22', 'GE23', 'GE24']
+EUREX_U_PRODUCT = ['U4', 'U5', 'U6', 'U7', 'U8', 'U9', 'U10', 'U11', 'U12']
+LIFFE_R_PRODUCT = ['L9', 'L10', 'L11', 'L12']
+TEST = ['UBLUES', 'LBLUES', 'BLUES']
 
 
 ###### A wrapper for get_norm_price:
@@ -85,7 +87,11 @@ def main():
 
 	read_exchange(LIFFE_R_PRODUCT, start_date, end_date)
 	print 'Finished LIFFE_R'
-	print 
+	print
+
+	read_exchange(TEST, start_date, end_date)
+	print 'Finished TEST'
+	print  
 	
 
 if __name__ == "__main__":
