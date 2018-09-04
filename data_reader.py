@@ -14,6 +14,9 @@ LIFFE_PRODUCT = ['X', 'G', 'R']
 ASX_PRODUCT = ['TS', 'YS', 'YAP']
 TMX_PRODUCT = ['CGB', 'SXF']
 TYO_PRODUCT = ['BT']
+CME_GE_PRODUCT = ['GE9', 'GE11']
+EUREX_U_PRODUCT = ['U7', 'U11']
+LIFFE_R_PRODUCT = ['L12']
 
 
 ###### A wrapper for get_norm_price:
@@ -39,38 +42,50 @@ def main():
 	
 	os.system('clear')
 	
-	read_exchange(CBOT_PRODUCT, start_date, end_date)
-	print 'Finished CBOT'
-	print
+	# read_exchange(CBOT_PRODUCT, start_date, end_date)
+	# print 'Finished CBOT'
+	# print
 
-	read_exchange(CME_PRODUCT, start_date, end_date)
-	print 'Finished CME'
-	print
+	# read_exchange(CME_PRODUCT, start_date, end_date)
+	# print 'Finished CME'
+	# print
 	
-	read_exchange(EUREX_PRODUCT, start_date, end_date)
-	print 'Finished EUREX'
-	print
+	# read_exchange(EUREX_PRODUCT, start_date, end_date)
+	# print 'Finished EUREX'
+	# print
 	
 
-	read_exchange(ICE_PRODUCT, start_date, end_date)
-	print 'Finished ICE'
-	print
+	# read_exchange(ICE_PRODUCT, start_date, end_date)
+	# print 'Finished ICE'
+	# print
 	
-	read_exchange(LIFFE_PRODUCT, start_date, end_date)
-	print 'Finished LIFFE'
-	print
+	# read_exchange(LIFFE_PRODUCT, start_date, end_date)
+	# print 'Finished LIFFE'
+	# print
 	
-	read_exchange(ASX_PRODUCT, start_date, end_date)
-	print 'Finished ASX'
-	print
+	# read_exchange(ASX_PRODUCT, start_date, end_date)
+	# print 'Finished ASX'
+	# print
 	
-	read_exchange(TMX_PRODUCT, start_date, end_date)
-	print 'Finished MOTREAL'
-	print
+	# read_exchange(TMX_PRODUCT, start_date, end_date)
+	# print 'Finished MOTREAL'
+	# print
 	
-	read_exchange(TYO_PRODUCT, start_date, end_date)
-	print 'Finished TYOKO'
-	print
+	# read_exchange(TYO_PRODUCT, start_date, end_date)
+	# print 'Finished TYOKO'
+	# print
+
+	read_exchange(CME_GE_PRODUCT, start_date, end_date)
+	print 'Finished CME_GE'
+	print 
+
+	read_exchange(EUREX_U_PRODUCT, start_date, end_date)
+	print 'Finished EUREX_U'
+	print 
+
+	read_exchange(LIFFE_R_PRODUCT, start_date, end_date)
+	print 'Finished LIFFE_R'
+	print 
 	
 
 if __name__ == "__main__":
