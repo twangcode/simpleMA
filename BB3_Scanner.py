@@ -51,7 +51,7 @@ def bb3_scanner_delta_days(BB3_list_filename, base_dir, end_date, delta_days, en
 	return df_Sharpe
 
 def main():
-	BB3_list_filename = 'data/BB3_list.csv'
+	BB3_list_filename = 'data/BB3/BB3_list.csv'
 	end_date = date.today()
 	start_date = end_date - timedelta(days=60)
 	start_date_2 = end_date - timedelta(days=30)

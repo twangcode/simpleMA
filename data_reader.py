@@ -35,7 +35,7 @@ def read_product(product_list, start_date, end_date, to_csv=True):
 		data = data_reader(symbol, start_date, end_date)
 		print data.tail(1)
 		if to_csv:
-			data.to_csv('{}.csv'.format(symbol))
+			data.to_csv('/data/{}.csv'.format(symbol))
 			print 'Save to {}.csv'.format(symbol) 
 
 def get_product_list():
