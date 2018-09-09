@@ -44,9 +44,11 @@ def get_product_list():
 	return prod_list
 
 def main():
-	start_date = datetime.date(2018,1,1)
+	# start_date = datetime.date(2018,1,1)
 	end_date = datetime.date.today() - datetime.timedelta(days=2)
-	
+	start_date = end_date - datetime.timedelta(days = 60)
+	print start_date
+	print end_date
 	os.system('clear')
 	prod_list = get_product_list()
 
