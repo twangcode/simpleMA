@@ -31,7 +31,7 @@ def data_reader(symbol, start_date, end_date, start_time=datetime.time(0,0,0), e
 	return data
 
 def read_product(product_list, start_date, end_date, to_csv=True):
-	for symbol in exchange_name:
+	for symbol in product_list:
 		data = data_reader(symbol, start_date, end_date)
 		print data.tail(1)
 		if to_csv:
