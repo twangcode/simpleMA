@@ -19,14 +19,12 @@ def bb3_backtest(spread_name, threshold, base_dir, start_date, end_date, entry, 
 	# Calculate drawdown
 	daily_PnL['MaxProfit'] = daily_PnL['cumPnL'].cummax()
 	
-
 	return sharpeRatio
 
 def bb3_backtest_delta_days(spread_name, threshold, base_dir, end_date, delta_days, entry, exit):
 	start_date = end_date - timedelta(days=delta_days)
 	sharpeRatio = bb3_backtest(spread_name, threshold, base_dir, start_date, end_date, entry, exit)
 	return sharpeRatio
-
 
 def bb3_scanner(BB3_list_filename, base_dir, start_date, end_date, entry=2.0, exit=0.5):
 	result = {}
@@ -35,11 +33,9 @@ def bb3_scanner(BB3_list_filename, base_dir, start_date, end_date, entry=2.0, ex
 	for row in BB3_list.itertuples():
 		spread_name = row[0]
 		threshold = row[1]
-		
+		# Calculate Shapre Ratio:
 		sharpeRatio = bb3_backtest(spread_name, threshold, base_dir, start_date, end_date, entry, exit)
-
 		result[spread_name] = sharpeRatio
-
 		# print spread_name, sharpeRatio
 
 	df_Sharpe = pd.DataFrame.from_dict({'Sharpe':result}).sort_values(by='Sharpe', ascending=False)
