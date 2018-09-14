@@ -66,7 +66,6 @@ def main():
 			SR.to_csv('data/{}.csv'.format(file[:-4]+'_log'))
 			print 'finished '+'data/{}.csv'.format(file[:-4]+'_log')
 	
-
 def main_2():
 	spread_name = 'CGB+C6'
 	threshold = 15
