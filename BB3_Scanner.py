@@ -4,6 +4,7 @@ from datetime import date, timedelta
 import numpy as np 
 import pandas as pd 
 import matplotlib.pyplot as plt 
+from pandas.tseries.offsets import BDay 
 
 def bb3_backtest(spread_name, threshold, base_dir, start_date, end_date, entry, exit):
 	data = tt.calculate_PnL(spread_name, base_dir, entry, exit, threshold)
@@ -49,8 +50,8 @@ def bb3_scanner_delta_days(BB3_list_filename, base_dir, end_date, delta_days, en
 
 def main():
 	end_date = date.today()
-	start_date = end_date - timedelta(days=30)
-	start_date_2 = end_date - timedelta(days=10)
+	start_date = (end_date - BDay(30)).to_pydatetime().date()
+	start_date_2 = (end_date - BDay(10)).to_pydatetime().date()
 
 	base_dir = 'data/data_2018'
 	bb3_list_folder = 'data/BB3'
